@@ -1,109 +1,198 @@
-Build a Retrieval-Augmented Generation (RAG) Chatbot that answers user queries based on uploaded or pre-provided documents by leveraging NLP preprocessing, semantic chunking, embeddings, and vector similarity search.
+# RAG Chatbot - Retrieval-Augmented Generation System
 
-🪄 Detailed Description
+A comprehensive RAG (Retrieval-Augmented Generation) Chatbot that answers queries based on custom documents using advanced NLP, semantic chunking, embeddings, and vector similarity search.
 
-You are tasked with creating a RAG Chatbot that uses retrieval + generation techniques to deliver context-aware and factually grounded responses from custom documents.
+## ✅ Implementation Complete
 
-Step-by-Step Process
+This repository contains a **fully functional RAG chatbot** with all the requested features implemented.
 
-Document Ingestion & Cleaning
+## 🚀 Quick Start
 
-Accept user documents (PDF, text, CSV, or HTML).
+```bash
+# 1. Setup
+./setup.sh && source venv/bin/activate
 
-Perform preprocessing using NLP techniques such as:
+# 2. Configure (add your API key to .env)
+cp .env.example .env
+nano .env
 
-Text normalization (lowercasing, punctuation removal)
+# 3. Ingest documents
+python main.py --ingest "TheUdyog Brochure.pdf"
 
-Stopword removal
+# 4. Start chatting
+python main.py --chat
+```
 
-Lemmatization or stemming
+See [QUICKSTART.md](QUICKSTART.md) for detailed setup instructions.
 
-Removing unwanted symbols, tables, or metadata noise
+## 📋 Implemented Features
 
-✅ Goal: Obtain clean and structured text ready for chunking.
+### ✅ Document Ingestion & Cleaning
+- Multi-format support: PDF, TXT, CSV, HTML, Markdown
+- Advanced NLP preprocessing:
+  - Text normalization (lowercasing, punctuation removal)
+  - Stopword removal
+  - Lemmatization and stemming
+  - Removal of URLs, emails, special characters
 
-Semantic Chunking
+### ✅ Semantic Chunking
+- Intelligent sentence-aware chunking
+- Configurable chunk size and overlap
+- Metadata preservation (source, position, document title)
+- Context-aware splitting
 
-Split the cleaned text into meaningful chunks using semantic segmentation, not just by length.
+### ✅ Embedding Generation
+- SentenceTransformers support (free, local)
+- OpenAI embeddings support
+- Batch processing for efficiency
+- Multiple model options
 
-Each chunk should preserve logical or contextual meaning (e.g., paragraph or section level).
+### ✅ Vector Storage (ChromaDB)
+- Persistent vector database
+- Metadata filtering
+- Fast similarity search
+- Document management APIs
 
-Add metadata (e.g., document title, section heading, source filename).
+### ✅ Query Processing & Retrieval
+- Semantic similarity search
+- Metadata-based filtering
+- Top-K retrieval
+- Context building
 
-✅ Goal: Maintain semantic integrity and context for each chunk.
+### ✅ Re-ranking & Enhancement
+- BM25 re-ranking
+- Cross-Encoder re-ranking
+- Hybrid scoring (vector + lexical)
+- Source attribution
 
-Embedding Generation
+### ✅ Response Generation
+- Multiple LLM providers:
+  - Anthropic Claude (Sonnet, Opus)
+  - OpenAI GPT (GPT-4, GPT-3.5)
+  - Local models (Hugging Face)
+- Conversation memory
+- Context-aware responses
+- Streaming support ready
 
-Use embedding models (like OpenAI embeddings, SentenceTransformers, or Hugging Face models) to convert each chunk into vector embeddings.
+## 📁 Project Structure
 
-Store the following for each chunk:
+```
+chatbot/
+├── main.py                    # Main CLI entry point
+├── setup.sh                   # Automated setup script
+├── requirements.txt           # All dependencies
+├── QUICKSTART.md             # 5-minute setup guide
+├── DOCUMENTATION.md          # Comprehensive documentation
+├── README_NEW.md             # Detailed README
+├── src/
+│   ├── rag_chatbot.py        # Main orchestrator
+│   ├── modules/              # Core components
+│   │   ├── document_ingestion.py
+│   │   ├── semantic_chunking.py
+│   │   ├── embeddings.py
+│   │   ├── vector_store.py
+│   │   ├── retrieval.py
+│   │   └── llm_integration.py
+│   └── utils/
+│       └── config.py         # Configuration management
+├── examples/
+│   └── example_usage.py      # Usage examples
+└── data/                     # Your documents go here
+```
 
-chunk_id
+## 🎯 Technologies Used
 
-text_chunk
+**Language**: Python 3.8+
 
-metadata
+**Core Libraries**:
+- `langchain` - LLM orchestration
+- `chromadb` - Vector storage
+- `sentence-transformers` - Embeddings
+- `nltk` - NLP preprocessing
+- `pdfplumber` & `PyPDF2` - PDF processing
+- `anthropic` & `openai` - LLM providers
+- `rank-bm25` - Re-ranking
 
-vector_embedding
+## 📚 Documentation
 
-✅ Goal: Represent textual meaning numerically for similarity-based retrieval.
+- **[QUICKSTART.md](QUICKSTART.md)** - Get started in 5 minutes
+- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Comprehensive guide
+- **[README_NEW.md](README_NEW.md)** - Detailed feature overview
 
-Vector Storage (ChromaDB Integration)
+## 💡 Usage Examples
 
-Store all embeddings inside ChromaDB, a local or cloud-based vector database.
+### Interactive Chat
+```bash
+python main.py --chat
+```
 
-Ensure metadata is stored for filtering or contextual grouping.
+### Single Query
+```bash
+python main.py --query "What is TheUdyog?" --sources
+```
 
-✅ Goal: Enable fast and efficient similarity search for relevant chunks.
+### Ingest Documents
+```bash
+python main.py --ingest ./data
+```
 
-Query Processing & Retrieval
+### Python API
+```python
+from src.rag_chatbot import RAGChatbot
 
-When a user sends a query, generate its embedding using the same embedding model.
+chatbot = RAGChatbot()
+chatbot.ingest_document("document.pdf")
+result = chatbot.query("What is this about?")
+print(result['answer'])
+```
 
-Perform similarity search in ChromaDB to retrieve the top relevant chunks.
+## 🔧 Configuration
 
-Use metadata filters if needed (e.g., document type or topic).
+All settings are configurable via `.env` file:
 
-✅ Goal: Retrieve the most contextually relevant chunks.
+```env
+# LLM Provider
+LLM_PROVIDER=anthropic  # or openai, local
+LLM_MODEL=claude-3-sonnet-20240229
 
-Re-ranking & Context Enhancement
+# Embeddings (free!)
+EMBEDDING_PROVIDER=sentence-transformers
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
-Apply Cross-Encoder re-ranking (optional but recommended) to refine retrieved chunks.
+# Retrieval Settings
+CHUNK_SIZE=512
+CHUNK_OVERLAP=50
+TOP_K_RETRIEVAL=10
+TOP_K_RERANK=5
+RERANKER_TYPE=bm25  # or cross-encoder, none
+```
 
-Select top-ranked chunks to form the context window.
+## ✨ Key Features
 
-Combine these chunks with the user’s query into a prompt template for the LLM.
+1. **No Vendor Lock-in**: Support for multiple LLM and embedding providers
+2. **Free Option**: Run embeddings locally with SentenceTransformers
+3. **Production Ready**: Persistent storage, error handling, logging
+4. **Extensible**: Easy to add new document types or providers
+5. **Well Documented**: Comprehensive docs and examples
+6. **CLI & API**: Use via command line or Python API
 
-✅ Goal: Improve retrieval precision before generating response.
+## 🧪 Testing
 
-Response Generation
+```bash
+# Test basic functionality (no API key needed)
+python test_basic.py
 
-Pass the context + user query into an LLM (e.g., GPT, Llama, or Mistral).
+# Run examples
+python examples/example_usage.py
+```
 
-The model generates a natural-language response grounded in the retrieved data.
+## 📞 Support
 
-Optionally integrate memory and tools to make the chatbot agentic (e.g., persistent memory, calculator, web search).
+For questions or issues:
+- Check [DOCUMENTATION.md](DOCUMENTATION.md)
+- Run `python main.py --help`
+- See [examples/](examples/) directory
 
-✅ Goal: Produce accurate, context-rich, and explainable responses.
+---
 
-⚙️ Technologies & Tools
-
-Language: Python
-
-Libraries:
-
-langchain or llama-index (for orchestration)
-
-nltk, spacy, transformers (for NLP processing)
-
-sentence-transformers (for embeddings)
-
-chromadb (for vector storage)
-
-LLMs: OpenAI, Anthropic Claude, or local Llama models
-
-Optional Enhancements:
-
-Add tool use (e.g., code interpreter, calculator)
-
-Integrate memory for multi-turn conversation persistence
+**Built with ❤️ using state-of-the-art RAG techniques**
