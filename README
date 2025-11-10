@@ -1,0 +1,109 @@
+Build a Retrieval-Augmented Generation (RAG) Chatbot that answers user queries based on uploaded or pre-provided documents by leveraging NLP preprocessing, semantic chunking, embeddings, and vector similarity search.
+
+🪄 Detailed Description
+
+You are tasked with creating a RAG Chatbot that uses retrieval + generation techniques to deliver context-aware and factually grounded responses from custom documents.
+
+Step-by-Step Process
+
+Document Ingestion & Cleaning
+
+Accept user documents (PDF, text, CSV, or HTML).
+
+Perform preprocessing using NLP techniques such as:
+
+Text normalization (lowercasing, punctuation removal)
+
+Stopword removal
+
+Lemmatization or stemming
+
+Removing unwanted symbols, tables, or metadata noise
+
+✅ Goal: Obtain clean and structured text ready for chunking.
+
+Semantic Chunking
+
+Split the cleaned text into meaningful chunks using semantic segmentation, not just by length.
+
+Each chunk should preserve logical or contextual meaning (e.g., paragraph or section level).
+
+Add metadata (e.g., document title, section heading, source filename).
+
+✅ Goal: Maintain semantic integrity and context for each chunk.
+
+Embedding Generation
+
+Use embedding models (like OpenAI embeddings, SentenceTransformers, or Hugging Face models) to convert each chunk into vector embeddings.
+
+Store the following for each chunk:
+
+chunk_id
+
+text_chunk
+
+metadata
+
+vector_embedding
+
+✅ Goal: Represent textual meaning numerically for similarity-based retrieval.
+
+Vector Storage (ChromaDB Integration)
+
+Store all embeddings inside ChromaDB, a local or cloud-based vector database.
+
+Ensure metadata is stored for filtering or contextual grouping.
+
+✅ Goal: Enable fast and efficient similarity search for relevant chunks.
+
+Query Processing & Retrieval
+
+When a user sends a query, generate its embedding using the same embedding model.
+
+Perform similarity search in ChromaDB to retrieve the top relevant chunks.
+
+Use metadata filters if needed (e.g., document type or topic).
+
+✅ Goal: Retrieve the most contextually relevant chunks.
+
+Re-ranking & Context Enhancement
+
+Apply Cross-Encoder re-ranking (optional but recommended) to refine retrieved chunks.
+
+Select top-ranked chunks to form the context window.
+
+Combine these chunks with the user’s query into a prompt template for the LLM.
+
+✅ Goal: Improve retrieval precision before generating response.
+
+Response Generation
+
+Pass the context + user query into an LLM (e.g., GPT, Llama, or Mistral).
+
+The model generates a natural-language response grounded in the retrieved data.
+
+Optionally integrate memory and tools to make the chatbot agentic (e.g., persistent memory, calculator, web search).
+
+✅ Goal: Produce accurate, context-rich, and explainable responses.
+
+⚙️ Technologies & Tools
+
+Language: Python
+
+Libraries:
+
+langchain or llama-index (for orchestration)
+
+nltk, spacy, transformers (for NLP processing)
+
+sentence-transformers (for embeddings)
+
+chromadb (for vector storage)
+
+LLMs: OpenAI, Anthropic Claude, or local Llama models
+
+Optional Enhancements:
+
+Add tool use (e.g., code interpreter, calculator)
+
+Integrate memory for multi-turn conversation persistence
