@@ -78,7 +78,7 @@ Examples:
     parser.add_argument(
         '--llm-provider',
         type=str,
-        choices=['openai', 'anthropic', 'local'],
+        choices=['openai', 'anthropic', 'google', 'local'],
         default=Config.LLM_PROVIDER,
         help=f'LLM provider (default: {Config.LLM_PROVIDER})'
     )

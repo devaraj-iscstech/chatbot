@@ -17,6 +17,7 @@ class Config:
     # API Keys
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
     # Embedding Settings
     EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "sentence-transformers")
@@ -87,6 +88,9 @@ def validate_config() -> bool:
 
     if Config.LLM_PROVIDER == "anthropic" and not Config.ANTHROPIC_API_KEY:
         errors.append("ANTHROPIC_API_KEY is required for Anthropic LLM provider")
+
+    if Config.LLM_PROVIDER == "google" and not Config.GOOGLE_API_KEY:
+        errors.append("GOOGLE_API_KEY is required for Google AI LLM provider")
 
     if Config.EMBEDDING_PROVIDER == "openai" and not Config.OPENAI_API_KEY:
         errors.append("OPENAI_API_KEY is required for OpenAI embedding provider")

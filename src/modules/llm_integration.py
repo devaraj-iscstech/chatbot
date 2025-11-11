@@ -116,6 +116,54 @@ class AnthropicProvider(LLMProvider):
             return f"Error: {str(e)}"
 
 
+class GoogleAIProvider(LLMProvider):
+    """Google AI LLM provider (Gemini models)"""
+
+    def __init__(self, model_name: str = "gemini-pro"):
+        """
+        Initialize Google AI provider
+
+        Args:
+            model_name: Gemini model to use (gemini-pro, gemini-pro-vision, etc.)
+        """
+        try:
+            import google.generativeai as genai
+        except ImportError:
+            raise ImportError("Google Generative AI library not installed. Install with: pip install google-generativeai")
+
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY environment variable not set")
+
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+        logger.info(f"Initialized Google AI provider with model: {model_name}")
+
+    def generate(
+        self,
+        prompt: str,
+        temperature: float = 0.7,
+        max_tokens: int = 1000
+    ) -> str:
+        """Generate response using Google AI Gemini"""
+        try:
+            generation_config = {
+                "temperature": temperature,
+                "max_output_tokens": max_tokens,
+            }
+
+            response = self.model.generate_content(
+                prompt,
+                generation_config=generation_config
+            )
+
+            return response.text
+        except Exception as e:
+            logger.error(f"Error generating response: {e}")
+            return f"Error: {str(e)}"
+
+
 class LocalLLMProvider(LLMProvider):
     """Local LLM provider using transformers"""
 
@@ -192,7 +240,7 @@ class ResponseGenerator:
         Initialize response generator
 
         Args:
-            provider: LLM provider ('openai', 'anthropic', 'local')
+            provider: LLM provider ('openai', 'anthropic', 'google', 'local')
             model_name: Specific model name (optional)
             temperature: Generation temperature
             max_tokens: Maximum tokens to generate
@@ -207,6 +255,9 @@ class ResponseGenerator:
         elif provider == "anthropic":
             default_model = "claude-3-sonnet-20240229"
             self.llm = AnthropicProvider(model_name or default_model)
+        elif provider == "google":
+            default_model = "gemini-pro"
+            self.llm = GoogleAIProvider(model_name or default_model)
         elif provider == "local":
             default_model = "facebook/opt-350m"
             self.llm = LocalLLMProvider(model_name or default_model)
