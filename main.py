@@ -73,7 +73,8 @@ Examples:
     parser.add_argument(
         '--embedding-model',
         type=str,
-        help='Specific embedding model name'
+        default=Config.EMBEDDING_MODEL,
+        help=f'Specific embedding model name (default: {Config.EMBEDDING_MODEL})'
     )
     parser.add_argument(
         '--llm-provider',
@@ -85,7 +86,8 @@ Examples:
     parser.add_argument(
         '--llm-model',
         type=str,
-        help='Specific LLM model name'
+        default=Config.LLM_MODEL,
+        help=f'Specific LLM model name (default: {Config.LLM_MODEL})'
     )
 
     # Retrieval settings

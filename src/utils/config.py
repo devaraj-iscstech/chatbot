@@ -7,8 +7,8 @@ from typing import Dict, Any
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (override system env vars with .env file)
+load_dotenv(override=True)
 
 
 class Config:
