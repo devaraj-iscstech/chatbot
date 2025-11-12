@@ -174,6 +174,97 @@ class OpenAIEmbedding(EmbeddingModel):
         return self.dimension
 
 
+class GoogleEmbedding(EmbeddingModel):
+    """
+    Embedding model using Google AI's Gemini embedding models
+    Supports gemini-embedding-001 and other Google embedding models
+    """
+
+    def __init__(self, model_name: str = "models/embedding-001"):
+        """
+        Initialize Google AI embedding model
+
+        Args:
+            model_name: Google embedding model name
+                       Options:
+                       - models/embedding-001: 768 dimensions, high quality
+                       - models/text-embedding-004: Latest model
+        """
+        try:
+            import google.generativeai as genai
+        except ImportError:
+            raise ImportError("Google Generative AI library not installed. Install with: pip install google-generativeai")
+
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY environment variable not set")
+
+        genai.configure(api_key=api_key)
+        self.model_name = model_name
+
+        # Gemini embeddings are 768 dimensions
+        self.dimension = 768
+
+        logger.info(f"Initialized Google embedding model: {model_name}")
+
+    def embed_text(self, text: str) -> List[float]:
+        """Generate embedding for a single text"""
+        import google.generativeai as genai
+
+        if not text or not text.strip():
+            return [0.0] * self.dimension
+
+        try:
+            result = genai.embed_content(
+                model=self.model_name,
+                content=text,
+                task_type="retrieval_document"
+            )
+            return result['embedding']
+        except Exception as e:
+            logger.error(f"Error generating Google embedding: {e}")
+            raise
+
+    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings for a batch of texts"""
+        import google.generativeai as genai
+
+        if not texts:
+            return []
+
+        # Filter empty texts
+        valid_texts = [t if t and t.strip() else " " for t in texts]
+
+        all_embeddings = []
+
+        # Google API has limits, process in batches
+        batch_size = 100
+
+        for i in range(0, len(valid_texts), batch_size):
+            batch = valid_texts[i:i + batch_size]
+
+            try:
+                # Embed batch
+                for text in batch:
+                    result = genai.embed_content(
+                        model=self.model_name,
+                        content=text,
+                        task_type="retrieval_document"
+                    )
+                    all_embeddings.append(result['embedding'])
+
+            except Exception as e:
+                logger.error(f"Error in batch embedding: {e}")
+                # Add zero vectors for failed embeddings
+                all_embeddings.extend([[0.0] * self.dimension] * len(batch))
+
+        return all_embeddings
+
+    def get_dimension(self) -> int:
+        """Get the dimension of the embedding vectors"""
+        return self.dimension
+
+
 class EmbeddingGenerator:
     """
     High-level interface for generating embeddings
@@ -189,7 +280,7 @@ class EmbeddingGenerator:
         Initialize embedding generator
 
         Args:
-            provider: Embedding provider ('sentence-transformers' or 'openai')
+            provider: Embedding provider ('sentence-transformers', 'openai', or 'google')
             model_name: Specific model name (optional, uses defaults if not provided)
         """
         self.provider = provider
@@ -202,6 +293,9 @@ class EmbeddingGenerator:
                 raise ImportError("OpenAI not available. Install with: pip install openai")
             default_model = "text-embedding-3-small"
             self.model = OpenAIEmbedding(model_name or default_model)
+        elif provider == "google":
+            default_model = "models/embedding-001"
+            self.model = GoogleEmbedding(model_name or default_model)
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 

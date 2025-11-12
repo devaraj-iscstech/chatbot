@@ -95,6 +95,9 @@ def validate_config() -> bool:
     if Config.EMBEDDING_PROVIDER == "openai" and not Config.OPENAI_API_KEY:
         errors.append("OPENAI_API_KEY is required for OpenAI embedding provider")
 
+    if Config.EMBEDDING_PROVIDER == "google" and not Config.GOOGLE_API_KEY:
+        errors.append("GOOGLE_API_KEY is required for Google AI embedding provider")
+
     # Check numeric values
     if Config.CHUNK_SIZE <= 0:
         errors.append("CHUNK_SIZE must be positive")

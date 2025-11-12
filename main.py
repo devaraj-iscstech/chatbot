@@ -66,7 +66,7 @@ Examples:
     parser.add_argument(
         '--embedding-provider',
         type=str,
-        choices=['sentence-transformers', 'openai'],
+        choices=['sentence-transformers', 'openai', 'google'],
         default=Config.EMBEDDING_PROVIDER,
         help=f'Embedding provider (default: {Config.EMBEDDING_PROVIDER})'
     )
