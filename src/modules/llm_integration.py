@@ -158,7 +158,57 @@ class GoogleAIProvider(LLMProvider):
                 generation_config=generation_config
             )
 
-            return response.text
+            # Check if response was blocked
+            if hasattr(response, 'prompt_feedback'):
+                block_reason = response.prompt_feedback.block_reason
+                if block_reason:
+                    logger.warning(f"Response blocked: {block_reason}")
+                    return f"Response was blocked due to: {block_reason}"
+
+            # Handle multi-part responses
+            # Always try to extract from candidates first for most reliable results
+            text_parts = []
+            try:
+                if response.candidates:
+                    logger.info(f"Number of candidates: {len(response.candidates)}")
+                    for idx, candidate in enumerate(response.candidates):
+                        logger.info(f"Candidate {idx} - Finish reason: {candidate.finish_reason}")
+                        if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                            logger.info(f"Candidate {idx} has {len(candidate.content.parts)} parts")
+                            for part_idx, part in enumerate(candidate.content.parts):
+                                if hasattr(part, 'text'):
+                                    part_text = part.text
+                                    logger.info(f"Part {part_idx} text length: {len(part_text)}")
+                                    text_parts.append(part_text)
+                                else:
+                                    logger.warning(f"Part {part_idx} has no text attribute")
+
+                result = ''.join(text_parts)
+                logger.info(f"Combined result length: {len(result)}")
+
+                if not result or result.strip() == "":
+                    logger.warning("Received empty response from Gemini")
+                    if response.candidates:
+                        finish_reason = response.candidates[0].finish_reason
+                        safety_ratings = response.candidates[0].safety_ratings
+                        logger.info(f"Finish reason: {finish_reason}")
+                        logger.info(f"Safety ratings: {safety_ratings}")
+                        return f"Empty response received. Finish reason: {finish_reason}"
+                    return "Empty response received from the model."
+
+                return result
+
+            except AttributeError as ae:
+                logger.error(f"AttributeError accessing response parts: {ae}")
+                # Fallback to simple text accessor
+                try:
+                    text = response.text
+                    logger.info(f"Fallback to response.text, length: {len(text)}")
+                    return text
+                except Exception as e2:
+                    logger.error(f"Could not access response.text either: {e2}")
+                    logger.error(f"Response object: {response}")
+                    return f"Error: Could not access response text - {str(ae)}"
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             return f"Error: {str(e)}"
